@@ -754,12 +754,12 @@ struct OrbitalCamera
 
 		// Build camera vector space
 		Math::Vec3 front_vec =  normalize(-1.0 * world_position);
-		Math::Vec3 right_vec = normalize(cross(front_vec, Math::Vec3(0.0f,1.0f,0.0f) ));
+		Math::Vec3 right_vec = normalize(cross(front_vec, Math::Vec3(0.0f, 1.0f, 0.0f)));
 		Math::Vec3 up_vec = normalize(cross(right_vec,front_vec));
 
 		// generate rays from the camera position along the right and upper frustrum plane
-		Math::Vec3 upper_ray = normalize(front_vec + (std::tan(fovy*0.5f) * up_vec));
-		Math::Vec3 right_ray = normalize(front_vec + (std::tan(fovy*0.5f)*aspect_ratio * right_vec));
+		Math::Vec3 upper_ray = normalize(front_vec + (std::tan(fovy * 0.5f) * up_vec));
+		Math::Vec3 right_ray = normalize(front_vec + (std::tan(fovy * 0.5f) * aspect_ratio * right_vec));
 
 		// intersect with unit sphere
 
@@ -1960,13 +1960,6 @@ int main(int argc, char*argv[])
 
 			/* Draw labels */
 			labels.draw(camera);
-
-			GeoBoundingBox bbox = camera.computeVisibleArea();
-			//std::cout << std::fixed;
-			//std::cout << std::setprecision(20);
-			//std::cout<<"min latitude: "<<bbox.min_latitude<<" max latitude: "<<bbox.max_latitude<<std::endl;
-			//std::cout<<"min longitude: "<<bbox.min_longitude<<" max longitude: "<<bbox.max_longitude<<std::endl;
-			//std::cout<<"camera lon: "<<camera.longitude<<" "<<camera.latitude<<std::endl;
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
