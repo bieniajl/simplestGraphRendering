@@ -241,7 +241,7 @@ namespace Math
 
 struct Settings {
 	std::string graph_path = "";
-	std::string font_path = "../resources/font_atlas.ppm";
+	std::string font_path = "";
 
 	bool center = false;
 	bool exit = false;
@@ -1789,7 +1789,7 @@ void printHelp(std::string_view program_name)
 			<< "Simple Graph Viewing Tool, to render a graph\n\n"
 			<< "Options:\n"
 			<< " -g GRAPHFILE, --graph-file GRAPHFILE\n\t\tSet the file containing the graph, usually a \".gl\" file\n"
-			<< " -F FONTFILE , --font-file  FONTFILE\n\t\tSet the file containing the font, expected is a \".ppm\" file\n\n"
+			<< " -F FONTFILE , --font-file  FONTFILE\n\t\tSet the file containing the font, expected is a \".ppm\" file. Currently not implemented.\n\n"
 			<< " -c, --center\n"
 			<< " -h, --help\tdisplay this help\n"
 			<< " -V, --version\n\n"
@@ -1824,6 +1824,9 @@ Settings parseArgs(int argc, char* argv[])
 		{
 		case 'c':
 			settings.center = true;
+			break;
+		case 'F':
+			settings.font_path = optarg;
 			break;
 		case 'g':
 			settings.graph_path = optarg;
@@ -1973,18 +1976,22 @@ int main(int argc, char*argv[])
 		/* Make camera accessable in window callbacks */
 		glfwSetWindowUserPointer(window,&camera);
 
-		/* Create text labels */
-		TextLabels labels;
-
 		//TODO FIND BUG: camera matrices have to be updated after label object creation....
 		camera.updateViewMatrix();
 		camera.updateProjectionMatrix();
 
-		for(int lon=-180; lon<=180 ; lon++)
-			labels.addLabel(std::to_string(lon),0.0,(float)lon,0.25);
+		//TODO Labels would be nice
+		// if (!settings.font_path.empty())
+		// {
+		// 	/* Create text labels */
+		// 	TextLabels labels;
 
-		for(int lat=-90; lat<=90 ; lat++)
-			labels.addLabel(std::to_string(lat),(float)lat,0.0,0.25);
+		// 	for(int lon=-180; lon<=180 ; lon++)
+		// 		labels.addLabel(std::to_string(lon),0.0,(float)lon,0.25);
+
+		// 	for(int lat=-90; lat<=90 ; lat++)
+		// 		labels.addLabel(std::to_string(lat),(float)lat,0.0,0.25);
+		// }
 
 		/* Create the debug sphere */
 		DebugSphere db_sphere;
@@ -2035,8 +2042,8 @@ int main(int argc, char*argv[])
 
 			lineGraph.draw( scale );
 
-			/* Draw labels */
-			labels.draw(camera);
+			/* TODO Draw labels */
+			// labels.draw(camera);
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
