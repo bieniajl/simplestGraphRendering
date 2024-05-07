@@ -7,12 +7,14 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
 #include <memory>
 #include <map>
 #include <list>
+#include <getopt.h>
 
 #include "debug_f_glsl.h"
 #include "debug_v_glsl.h"
@@ -236,6 +238,14 @@ namespace Math
 		return ( v/l );
 	}
 }
+
+struct Settings {
+	std::string graph_path = "";
+	std::string font_path = "../resources/font_atlas.ppm";
+
+	bool center = false;
+	bool exit = false;
+};
 
 /**
  * Node struct for parsing preprocessed osm graph from file
@@ -1771,32 +1781,89 @@ namespace Parser
 	}
 }
 
+void printHelp(std::string_view program_name)
+{
+	std::cout << "Usage:\n"
+			<< program_name
+			<< " [options]\n\n"
+			<< "Simple Graph Viewing Tool, to render a graph\n\n"
+			<< "Options:\n"
+			<< " -g GRAPHFILE, --graph-file GRAPHFILE\n\t\tSet the file containing the graph, usually a \".gl\" file\n"
+			<< " -F FONTFILE , --font-file  FONTFILE\n\t\tSet the file containing the font, expected is a \".ppm\" file\n\n"
+			<< " -c, --center\n"
+			<< " -h, --help\tdisplay this help\n"
+			<< " -V, --version\n\n"
+			<< "For more Information please do not refer to the nonexistent manpage"
+			<< std::endl;
+}
+
+Settings parseArgs(int argc, char* argv[])
+{
+	Settings settings;
+
+	int c;
+
+	static struct option long_options[] = {
+		{"graph-file", required_argument, 0, 'g'},
+		{"font-file",  required_argument, 0, 'F'},
+		{"center",     no_argument,       0, 'c'},
+		{"help",       no_argument,       0, 'h'},
+		{"version",    no_argument,       0, 'V'},
+		{0, 0, 0, 0}
+	};
+
+	while (true)
+	{
+		int option_index = 0;
+
+		c = getopt_long (argc, argv, "g:chV", long_options, &option_index);
+
+		if (c == -1) break;
+
+		switch (c)
+		{
+		case 'c':
+			settings.center = true;
+			break;
+		case 'g':
+			settings.graph_path = optarg;
+			break;
+		case 'h':
+			printHelp(argv[0]);
+			settings.exit = true;
+			break;
+		case 'V':
+			std::cout << "Version 0.1-alpha" << std::endl;
+			settings.exit = true;
+			break;
+		default:
+			break;
+		}
+	}
+
+	return settings;
+}
+
 int main(int argc, char*argv[])
 {
-	/////////////////////////////////////
-	// overly simple command line parsing
-	/////////////////////////////////////
-
-	std::string filepath;
-
-	int i=1;
-	if (argc < 3) {
-		std::cout<<"Supply a graph with -gf <graph.gl>"<<std::endl; return 0;
-	}
-	while(i<argc)
+	if (argc < 2)
 	{
-		if(argv[i] == (std::string) "-gf")
-		{
-			i++;
-			if(i<argc) { filepath = argv[i]; i++; }
-			else { std::cout<<"Missing parameter for -gf"<<std::endl; return 0; }
-		}
-		else
-		{
-			i++;
-		}
+		printHelp(argv[0]);
+		return 1;
 	}
 
+	// Parse the arguments
+	Settings settings = parseArgs(argc, argv);
+	if (settings.exit)
+	{
+		return 0;
+	}
+
+	if (settings.graph_path.empty())
+	{
+		std::cout << "No File Povided! For Usage refer to " << argv[0] << " -h for help." << std::endl;
+		return 1;
+	}
 
 	/////////////////////////////////////
 	// Window and OpenGL Context creation
@@ -1852,7 +1919,7 @@ int main(int argc, char*argv[])
 	std::vector<Node> nodes;
 	std::vector<Edge> edges;
 
-	Parser::parseTxtGraphFile(filepath,nodes,edges);
+	Parser::parseTxtGraphFile(settings.graph_path,nodes,edges);
 
 
 	/////////////////////////////////////////////////////////////////////
@@ -1885,8 +1952,18 @@ int main(int argc, char*argv[])
 
 		/* Create a orbital camera */
 		OrbitalCamera camera;
-		camera.longitude = 0.0f;
-		camera.latitude = 0.0f;
+		if (settings.center)
+		{
+			auto limitsLat = std::minmax_element(nodes.begin(), nodes.end(), [](const Node& lhs, const Node& rhs) { return lhs.lat < rhs.lat; });
+			auto limitsLong = std::minmax_element(nodes.begin(), nodes.end(), [](const Node& lhs, const Node& rhs) { return lhs.lon < rhs.lon; });
+			camera.longitude = ((limitsLong.second->lon - limitsLong.first->lon) / 2) + limitsLong.first->lon;
+			camera.latitude = ((limitsLat.second->lat - limitsLat.first->lat) / 2) + limitsLat.first->lat;
+		}
+		else
+		{
+			camera.longitude = 0.0f;
+			camera.latitude = 0.0f;
+		}
 		camera.orbit = 5.0f;
 		camera.near = 0.0001f;
 		camera.far = 10.0f;
@@ -1961,7 +2038,8 @@ int main(int argc, char*argv[])
 			/* Draw labels */
 			labels.draw(camera);
 
-			GeoBoundingBox bbox = camera.computeVisibleArea();
+
+			//GeoBoundingBox bbox = camera.computeVisibleArea();
 			//std::cout << std::fixed;
 			//std::cout << std::setprecision(20);
 			//std::cout<<"min latitude: "<<bbox.min_latitude<<" max latitude: "<<bbox.max_latitude<<std::endl;
