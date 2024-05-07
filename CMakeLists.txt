@@ -48,5 +48,12 @@ add_executable(simple
 include(FileEmbed.cmake)
 FileEmbedSetup()
 FileEmbedAdd(src/debug_f.glsl)
+FileEmbedAdd(src/debug_v.glsl)
+FileEmbedAdd(src/edge_f.glsl)
+FileEmbedAdd(src/edge_v.glsl)
+FileEmbedAdd(src/polygon_f.glsl)
+FileEmbedAdd(src/polygon_v.glsl)
+FileEmbedAdd(src/textLabel_f.glsl)
+FileEmbedAdd(src/textLabel_v.glsl)
 
 target_link_libraries(simple file_embed ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})

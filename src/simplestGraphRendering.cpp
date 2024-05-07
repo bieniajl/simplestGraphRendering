@@ -15,6 +15,13 @@
 #include <list>
 
 #include "debug_f_glsl.h"
+#include "debug_v_glsl.h"
+#include "edge_f_glsl.h"
+#include "edge_v_glsl.h"
+#include "polygon_f_glsl.h"
+#include "polygon_v_glsl.h"
+#include "textLabel_f_glsl.h"
+#include "textLabel_v_glsl.h"
 
 typedef unsigned int uint;
 
