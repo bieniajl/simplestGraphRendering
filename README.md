@@ -1,32 +1,35 @@
 The Simplest Graph Renderer there is
 
-Dependencies:
+# Dependencies
 
 - GLEW
 - OpenGL
 - GLFW
 
-To build super lazy on Linux:
+# Build
+
+## Lazy
 
 ```bash
 ./build.sh
 ```
 
-To build:
+## Manual
 
 ```bash
 mkdir build
 cd build
 cmake ..
+make
 ```
 
-To run (in build):
+# Execution
 
 ```bash
 ./simple -gf <path-to-graph-file>
 ```
 
-Expected Graph Format:
+# Expected Graph Format
 
 ```
 <Vertex Count>
