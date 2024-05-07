@@ -291,21 +291,47 @@ struct GeoBoundingBox
 	float max_latitude;
 };
 
-/**
- * Function to simply read the string of a shader source file from disk
- */
-const std::string readShaderFile(const char* const path)
+enum class Shader
 {
-	std::ifstream inFile( path, std::ios::in );
+	Debug,
+	Edge,
+	Polygon,
+	TextLabel
+};
 
-	std::ostringstream source;
-	while( inFile.good() ) {
-		int c = inFile.get();
-		if( ! inFile.eof() ) source << (char) c;
+const std::string GetShader(const Shader shader, const bool vertex)
+{
+	switch (shader)
+	{
+	default:
+	case Shader::Debug:
+		if (vertex) {
+			return std::string(debug_v_glsl_data, debug_v_glsl_size);
+		} else {
+			return std::string(debug_f_glsl_data, debug_f_glsl_size);
+		}
+
+	case Shader::Edge:
+		if (vertex) {
+			return std::string(edge_v_glsl_data, edge_v_glsl_size);
+		} else {
+			return std::string(edge_f_glsl_data, edge_f_glsl_size);
+		}
+
+	case Shader::Polygon:
+		if (vertex) {
+			return std::string(polygon_v_glsl_data, polygon_v_glsl_size);
+		} else {
+			return std::string(polygon_f_glsl_data, polygon_f_glsl_size);
+		}
+
+	case Shader::TextLabel:
+		if (vertex) {
+			return std::string(textLabel_v_glsl_data, textLabel_v_glsl_size);
+		} else {
+			return std::string(textLabel_f_glsl_data, textLabel_f_glsl_size);
+		}
 	}
-	inFile.close();
-
-	return source.str();
 }
 
 /**
@@ -362,7 +388,7 @@ GLuint compileShader(const std::string * const source, GLenum shaderType)
  * \attribute attributes Vertex shader input attributes (i.e. vertex layout)
  * \return Returns the handle of the created GLSL program
  */
-GLuint createShaderProgram(const char* vs_path, const char* fs_path, std::vector<const char*> attributes)
+GLuint createShaderProgram(const Shader shader, std::vector<const char*> attributes)
 {
 	/* Create a shader program object */
 	GLuint handle;
@@ -376,7 +402,7 @@ GLuint createShaderProgram(const char* vs_path, const char* fs_path, std::vector
 		glBindAttribLocation(handle, i, attributes[i]);
 
 	/* Read the shader source files */
-	std::string vs_source = readShaderFile(vs_path);
+	std::string vs_source = GetShader(shader, true);
 
 	GLuint vertex_shader = compileShader(&vs_source, GL_VERTEX_SHADER);
 
@@ -390,7 +416,7 @@ GLuint createShaderProgram(const char* vs_path, const char* fs_path, std::vector
 
 
 	/* Load, compile and attach fragment shader */
-	std::string fs_source = readShaderFile(fs_path);
+	std::string fs_source = GetShader(shader, false);
 
 	GLuint fragment_shader = compileShader(&fs_source,GL_FRAGMENT_SHADER);
 
@@ -1154,7 +1180,7 @@ struct TextLabels
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		// Load text label shader program
-		prgm_handle = createShaderProgram("../src/textLabel_v.glsl","../src/textLabel_f.glsl",{"v_position","v_uv"});
+		prgm_handle = createShaderProgram(Shader::TextLabel, {"v_position","v_uv"});
 
 		// Load font atlas
 		unsigned long begin_pos;
@@ -1333,7 +1359,7 @@ struct Polygons
 	Polygons()
 	{
 		// Load polygon shader program
-		prgm_handle = createShaderProgram("../src/polygon_v.glsl","../src/polygon_f.glsl",{"v_position"});
+		prgm_handle = createShaderProgram(Shader::Polygon, {"v_position"});
 
 		index_offsets.push_back(0);
 	}
@@ -1747,10 +1773,6 @@ namespace Parser
 
 int main(int argc, char*argv[])
 {
-	std::string val(debug_f_glsl_data, debug_f_glsl_size);
-	std::cout << val << std::endl;
-	std::cout << std::endl;
-
 	/////////////////////////////////////
 	// overly simple command line parsing
 	/////////////////////////////////////
@@ -1847,8 +1869,8 @@ int main(int argc, char*argv[])
 	 */
 	{
 		/* Create GLSL programs */
-		GLuint shader_prgm_handle = createShaderProgram("../src/edge_v.glsl","../src/edge_f.glsl",{"v_geoCoords","v_color"});
-		GLuint debug_prgm_handle = createShaderProgram("../src/debug_v.glsl","../src/debug_f.glsl",{"v_position"});
+		GLuint shader_prgm_handle = createShaderProgram(Shader::Edge, {"v_geoCoords","v_color"});
+		GLuint debug_prgm_handle = createShaderProgram(Shader::Debug, {"v_position"});
 
 		//GLenum glerror = glGetError();
 		//std::cout<<glerror<<std::endl;
