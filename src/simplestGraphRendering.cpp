@@ -14,6 +14,8 @@
 #include <map>
 #include <list>
 
+#include "debug_f_glsl.h"
+
 typedef unsigned int uint;
 
 namespace Math
@@ -120,33 +122,33 @@ namespace Math
 		Mat4x4 inverse()
 		{
 			float a00 = data[0], a01 = data[1], a02 = data[2], a03 = data[3],
-		    a10 = data[4], a11 = data[5], a12 = data[6], a13 = data[7],
-		    a20 = data[8], a21 = data[9], a22 = data[10], a23 = data[11],
-		    a30 = data[12], a31 = data[13], a32 = data[14], a33 = data[15],
+			a10 = data[4], a11 = data[5], a12 = data[6], a13 = data[7],
+			a20 = data[8], a21 = data[9], a22 = data[10], a23 = data[11],
+			a30 = data[12], a31 = data[13], a32 = data[14], a33 = data[15],
 
-		    b00 = a00 * a11 - a01 * a10,
-		    b01 = a00 * a12 - a02 * a10,
-		    b02 = a00 * a13 - a03 * a10,
-		    b03 = a01 * a12 - a02 * a11,
-		    b04 = a01 * a13 - a03 * a11,
-		    b05 = a02 * a13 - a03 * a12,
-		    b06 = a20 * a31 - a21 * a30,
-		    b07 = a20 * a32 - a22 * a30,
-		    b08 = a20 * a33 - a23 * a30,
-		    b09 = a21 * a32 - a22 * a31,
-		    b10 = a21 * a33 - a23 * a31,
-		    b11 = a22 * a33 - a23 * a32,
+			b00 = a00 * a11 - a01 * a10,
+			b01 = a00 * a12 - a02 * a10,
+			b02 = a00 * a13 - a03 * a10,
+			b03 = a01 * a12 - a02 * a11,
+			b04 = a01 * a13 - a03 * a11,
+			b05 = a02 * a13 - a03 * a12,
+			b06 = a20 * a31 - a21 * a30,
+			b07 = a20 * a32 - a22 * a30,
+			b08 = a20 * a33 - a23 * a30,
+			b09 = a21 * a32 - a22 * a31,
+			b10 = a21 * a33 - a23 * a31,
+			b11 = a22 * a33 - a23 * a32,
 
-		    // Calculate the determinant
-		    det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+			// Calculate the determinant
+			det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 
-		    //if (!det) {
-		    //    return null;
-		    //}
+			//if (!det) {
+			//    return null;
+			//}
 			// The inverse is used as multiplication factor
-		    det = 1.0f / det;
+			det = 1.0f / det;
 
-		    return Mat4x4(std::array<float,16>({	(a11 * b11 - a12 * b10 + a13 * b09) * det,
+			return Mat4x4(std::array<float,16>({	(a11 * b11 - a12 * b10 + a13 * b09) * det,
 						(a02 * b10 - a01 * b11 - a03 * b09) * det,
 						(a31 * b05 - a32 * b04 + a33 * b03) * det,
 						(a22 * b04 - a21 * b05 - a23 * b03) * det,
@@ -646,7 +648,7 @@ struct OrbitalCamera
 	void updateProjectionMatrix()
 	{
 		float f = 1.0f / std::tan(fovy / 2.0f);
-        float nf = 1.0f / (near - far);
+		float nf = 1.0f / (near - far);
 		projection_matrix[0] = f / aspect_ratio;
 		projection_matrix[1] = 0.0f;
 		projection_matrix[2] = 0.0f;
@@ -1738,6 +1740,13 @@ namespace Parser
 
 int main(int argc, char*argv[])
 {
+	for (size_t i = 0; i < debug_f_glsl_size; ++i)
+	{
+		std::cout << debug_f_glsl_data[i];
+	}
+	std::cout << std::endl;
+	std::cout << std::endl;
+
 	/////////////////////////////////////
 	// overly simple command line parsing
 	/////////////////////////////////////
@@ -1745,7 +1754,7 @@ int main(int argc, char*argv[])
 	std::string filepath;
 
 	int i=1;
-    if (argc < 3) {
+	if (argc < 3) {
 		std::cout<<"Supply a graph with -gf <graph.gl>"<<std::endl; return 0;
 	}
 	while(i<argc)
@@ -1767,26 +1776,26 @@ int main(int argc, char*argv[])
 	// Window and OpenGL Context creation
 	/////////////////////////////////////
 
-    GLFWwindow* window;
+	GLFWwindow* window;
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
+	/* Initialize the library */
+	if (!glfwInit())
+		return -1;
 
-    /* Create a windowed mode window and its OpenGL context */
+	/* Create a windowed mode window and its OpenGL context */
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    window = glfwCreateWindow(1600, 900, "Simple Graph Renderer", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
-    }
+	window = glfwCreateWindow(1600, 900, "Simple Graph Renderer", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
+	}
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
 
 	/*	Initialize glew */
 	//glewExperimental = GL_TRUE;
@@ -1893,7 +1902,7 @@ int main(int argc, char*argv[])
 		{
 			Controls::updateOrbitalCamera(window);
 
-		    /* Render here */
+			/* Render here */
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1933,11 +1942,11 @@ int main(int argc, char*argv[])
 			//std::cout<<"min longitude: "<<bbox.min_longitude<<" max longitude: "<<bbox.max_longitude<<std::endl;
 			//std::cout<<"camera lon: "<<camera.longitude<<" "<<camera.latitude<<std::endl;
 
-		    /* Swap front and back buffers */
-		    glfwSwapBuffers(window);
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
 
-		    /* Poll for and process events */
-		    glfwPollEvents();
+			/* Poll for and process events */
+			glfwPollEvents();
 		}
 
 
@@ -1946,6 +1955,6 @@ int main(int argc, char*argv[])
 		glDeleteProgram(debug_prgm_handle);
 	}
 
-    glfwTerminate();
-    return 0;
+	glfwTerminate();
+	return 0;
 }

@@ -1,15 +1,3 @@
-# USING cmake:
-#   mkdir build
-#   cd build
-#   cmake ..
-#   make -j
-
-# RUN unit tests:
-#   cd build
-#   ctest
-
-
-
 # OBJECT library requires 2.8.8
 cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
 project(simplestGraphRendering CXX C)
@@ -53,25 +41,12 @@ if(NOT VERBOSE)
 	add_definitions(-DNVERBOSE)
 endif()
 
-# compile shared sources only once, and reuse object files in both,
-# as they are compiled with the same options anyway
-#add_library(common OBJECT
-#	src/nodes_and_edges.cpp
-#	src/file_formats.cpp
-#)
-
 add_executable(simple
 	  src/simplestGraphRendering.cpp
 )
-target_link_libraries(simple ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
 
-#add_executable(run_tests
-#	src/run_tests.cpp
-#	src/unit_tests.cpp
-#	$<TARGET_OBJECTS:common>
-#)
-#
-#add_test(NAME unit-test
-#	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src"
-#	COMMAND $<TARGET_FILE:run_tests>
-#)
+include(FileEmbed.cmake)
+FileEmbedSetup()
+FileEmbedAdd(src/debug_f.glsl)
+
+target_link_libraries(simple file_embed ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
