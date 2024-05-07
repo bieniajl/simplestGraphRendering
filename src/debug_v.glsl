@@ -10,8 +10,8 @@ out float view_depth;
 void main()
 {
 	view_depth = (view_matrix * vec4(v_position,1.0)).z;
-	
+
 	gl_Position = projection_matrix * view_matrix * vec4(v_position,1.0);
-	
+
 	//gl_Position = vec4(v_position,1.0);
 }
