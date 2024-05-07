@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <cmath>
 #include <array>
 #include <vector>
 #include <fstream>
@@ -74,19 +75,19 @@ namespace Math
 			return std::sqrt(x*x+y*y+z*z);
 		}
 	};
-	
+
 	struct Mat4x4
 	{
 		Mat4x4() : data() {}
 		Mat4x4(const std::array<float,16> data) : data(data) {}
-	
+
 		std::array<float,16> data;
-	
+
 		float& operator[] (int index)
 		{
 			return data[index];
 		}
-	
+
 		Mat4x4 operator* (const Mat4x4& m)
 		{
 			Mat4x4 b(m);
@@ -115,7 +116,7 @@ namespace Math
 				})
 			);
 		}
-	
+
 		Mat4x4 inverse()
 		{
 			float a00 = data[0], a01 = data[1], a02 = data[2], a03 = data[3],
@@ -270,7 +271,7 @@ struct Vertex
 };
 
 /*
- * 
+ *
  */
 struct GeoBoundingBox
 {
@@ -445,12 +446,12 @@ namespace ResourceLoader
 		std::string buffer;
 		std::string compBuffer;
 		std::ifstream file (filename,std::ios::in | std::ios::binary);
-	
+
 		/*
 		/	Check if the file could be opened.
 		*/
 		if(!( file.is_open() ))return false;
-	
+
 		/*
 		/	Go to the beginning of the file and read the first line.
 		*/
@@ -492,7 +493,7 @@ namespace ResourceLoader
 				}
 			}
 		}
-	
+
 		/*
 		/	If the information we were looking for was inside the first line, we are done here.
 		/	Note the position where we left off and exit with return true after closing the file.
@@ -503,7 +504,7 @@ namespace ResourceLoader
 			file.close();
 			return true;
 		}
-	
+
 		/*
 		/	If the information wasn't inside the first line we have to keep reading lines.
 		/	Skip all comment lines (first character = '#').
@@ -513,7 +514,7 @@ namespace ResourceLoader
 		{
 			std::getline(file,buffer,'\n');
 		}
-	
+
 		/*
 		/	Now we should have a string containing the image dimensions and can extract them.
 		*/
@@ -529,7 +530,7 @@ namespace ResourceLoader
 				itr1 = (itr2 + 1);
 			}
 		}
-	
+
 		/*
 		/	The last component of a line can't be parsed within the loop since it isn't followed by
 		/	a space character, but an end-of-line.
@@ -538,7 +539,7 @@ namespace ResourceLoader
 		*/
 		compBuffer.assign(itr1, itr2);
 		imgDimY = atoi(compBuffer.c_str());
-	
+
 		/*
 		/	Read one more line. This should contain the maximum value of the image, but we don't need
 		/	that.
@@ -549,7 +550,7 @@ namespace ResourceLoader
 		file.close();
 		return true;
 	}
-	
+
 	/**
 	 * \brief Read a the data of a ppm image file. Courtesy to the computer vision lecture I attended.
 	 * \param filename Location of the image file
@@ -562,12 +563,12 @@ namespace ResourceLoader
 	bool readPpmData(const char* filename, char* imageData, unsigned long dataBegin, int imgDimX, int imgDimY)
 	{
 		std::ifstream file (filename,std::ios::in | std::ios::binary);
-	
+
 		/*
 		/	Check if the file could be opened.
 		*/
 		if(!( file.is_open() ))return false;
-	
+
 		/*
 		/	Determine the length from the beginning of the image data to the end of the file.
 		*/
@@ -575,10 +576,10 @@ namespace ResourceLoader
 		unsigned long length = static_cast<unsigned long>(file.tellg());
 		length = length - dataBegin;
 		char* buffer = new char[length];
-	
+
 		file.seekg(dataBegin,std::ios::beg);
 		file.read(buffer,length);
-	
+
 		/*
 		/	Rearrange the image information so that the data begins with the lower left corner.
 		*/
@@ -596,7 +597,7 @@ namespace ResourceLoader
 				k++;
 			}
 		}
-	
+
 		file.close();
 		delete[] buffer;
 		return true;
@@ -706,12 +707,12 @@ struct OrbitalCamera
 		// computer euklid. position of camera
 		float lat_sin = sin( (PI/180.0f) * latitude);
 		float lon_sin = sin( (PI/180.0f) * longitude);
-	
+
 		float lat_cos = cos( (PI/180.0f) * latitude);
 		float lon_cos = cos( (PI/180.0f) * longitude);
-	
+
 		float r = orbit;
-	
+
 		Math::Vec3 world_position( lon_sin * lat_cos * r,
 									lat_sin * r,
 									lat_cos * lon_cos * r );
@@ -739,7 +740,7 @@ struct OrbitalCamera
 		else
 		{
 			float lambda = (-b - sqrt(discr)) / (2.0f * a);
-			upper_intersection = world_position + (lambda * upper_ray); 
+			upper_intersection = world_position + (lambda * upper_ray);
 		}
 
 		Math::Vec3 right_intersection;
@@ -849,18 +850,18 @@ struct Subgraph
 
 		// At least as many vertices as there are nodes are required
 		vertices.reserve(nodes.size());
-	
+
 		// Each edge contributes two indices
 		indices.reserve(edges.size()*2);
-	
+
 		// Copy geo coordinates from input nodes to vertices
 		for(auto& node : nodes)
 		{
 			vertices.push_back(Vertex((float)node.lon,(float)node.lat));
 		}
-	
+
 		std::sort(edges.begin(),edges.end(), [](Edge u, Edge v) { return u.width < v.width; } );
-	
+
 		// Copy indices from edge array to index array
 		std::vector<bool> has_next(nodes.size(), false);
 		std::vector<uint> next(nodes.size(),0);
@@ -870,17 +871,17 @@ struct Subgraph
 		{
 			uint src_id = edge.source;
 			uint tgt_id = edge.target;
-	
+
 			while(has_next[src_id] && (vertices[src_id].color != edge.color))
 			{
 				src_id = next[src_id];
 			}
-	
+
 			if(vertices[src_id].color == -1)
 			{
 				vertices[src_id].color = (float)edge.color;
 			}
-	
+
 			if(vertices[src_id].color != edge.color)
 			{
 				uint next_id = (uint)vertices.size();
@@ -888,22 +889,22 @@ struct Subgraph
 				vertices[next_id].color = (float)edge.color;
 				has_next.push_back(false);
 				next.push_back(0);
-	
+
 				next[src_id] = next_id;
 				has_next[src_id] = true;
 				src_id = next_id;
 			}
-	
+
 			while(has_next[tgt_id] && (vertices[tgt_id].color != edge.color))
 			{
 				tgt_id = next[tgt_id];
 			}
-	
+
 			if(vertices[tgt_id].color == -1)
 			{
 				vertices[tgt_id].color = (float)edge.color;
 			}
-	
+
 			if(vertices[tgt_id].color != edge.color)
 			{
 				uint next_id = (uint)vertices.size();
@@ -911,26 +912,26 @@ struct Subgraph
 				vertices[next_id].color = (float)edge.color;
 				has_next.push_back(false);
 				next.push_back(0);
-	
+
 				next[tgt_id] = next_id;
 				has_next[tgt_id] = true;
 				tgt_id = next_id;
 			}
-	
+
 			//std::cout<<"Edge color: "<<edge.color<<std::endl;
 			//std::cout<<"Source color: "<<vertices[src_id].color<<std::endl;
 			//std::cout<<"Target color: "<<vertices[tgt_id].color<<std::endl;
-	
+
 			if(width != edge.width)
 			{
 				index_offsets.push_back(counter);
 				line_widths.push_back((float)edge.width);
 				width = edge.width;
 			}
-	
+
 			indices.push_back(src_id);
 			indices.push_back(tgt_id);
-	
+
 			counter += 2;
 		}
 		index_offsets.push_back( (uint)indices.size() );
@@ -967,7 +968,7 @@ struct Subgraph
 		glVertexAttribPointer(1, 1, GL_FLOAT, false, sizeof(Vertex), (GLvoid*) (sizeof(GL_FLOAT)*2));
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
+
 		//std::cout<<"GfxGraph consisting of "<<vertices.size()<<" vertices and "<<indices.size()<<" indices"<<std::endl;
 	}
 
@@ -1448,12 +1449,12 @@ private:
 		if(polyvertices.size() < 3)
 			throw(std::runtime_error(
 				std::string("can not triangulate polygon with less than 3 vertices")));
-	
+
 		std::vector<uint> triangles;
 		std::list<Math::Vec3> vertices;
 		for(uint i=0; i<polyvertices.size(); i++)
 			vertices.push_back(Math::Vec3(polyvertices[i].x, polyvertices[i].y, float(i)));
-	
+
 		while(vertices.size() >= 3)
 		{
 			Math::Vec3 pre = vertices.front();
@@ -1830,7 +1831,7 @@ int main(int argc, char*argv[])
 	 *
 	 * Instances of structs holding OpenGL handles are created within an additional
 	 * scope, so that they are destroyed while the OpenGL context is still alive
-	 */	
+	 */
 	{
 		/* Create GLSL programs */
 		GLuint shader_prgm_handle = createShaderProgram("../src/edge_v.glsl","../src/edge_f.glsl",{"v_geoCoords","v_color"});
