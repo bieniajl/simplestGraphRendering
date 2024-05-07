@@ -1747,11 +1747,8 @@ namespace Parser
 
 int main(int argc, char*argv[])
 {
-	for (size_t i = 0; i < debug_f_glsl_size; ++i)
-	{
-		std::cout << debug_f_glsl_data[i];
-	}
-	std::cout << std::endl;
+	std::string val(debug_f_glsl_data, debug_f_glsl_size);
+	std::cout << val << std::endl;
 	std::cout << std::endl;
 
 	/////////////////////////////////////

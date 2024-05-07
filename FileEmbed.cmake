@@ -52,7 +52,7 @@ function(FileEmbedGenerate file generated_c)
 
     set(output_c "
 #include \"${c_name}.h\"
-uint8_t ${c_name}_data[] = {
+char ${c_name}_data[] = {
     ${output_c}
 }\;
 unsigned ${c_name}_size = sizeof(${c_name}_data)\;
@@ -62,7 +62,7 @@ unsigned ${c_name}_size = sizeof(${c_name}_data)\;
 #ifndef ${c_name}_H
 #define ${c_name}_H
 #include \"stdint.h\"
-extern uint8_t ${c_name}_data[]\;
+extern char ${c_name}_data[]\;
 extern unsigned ${c_name}_size\;
 #endif // ${c_name}_H
     ")
