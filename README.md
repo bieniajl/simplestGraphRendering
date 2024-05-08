@@ -26,8 +26,9 @@ make
 # Execution
 
 ```bash
-./simple -gf <path-to-graph-file>
+./simple -g <path-to-graph-file>
 ```
+
 
 # Expected Graph Format
 
