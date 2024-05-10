@@ -239,7 +239,8 @@ namespace Math
 	}
 }
 
-struct Settings {
+struct Settings
+{
 	std::string graph_path = "";
 	std::string font_path = "";
 
@@ -253,8 +254,7 @@ struct Settings {
 struct Node
 {
 	Node() : lat(0), lon(0) {}
-	Node(double la, double lo) :
-	lat(la), lon(lo) {}
+	Node(double la, double lo) : lat(la), lon(lo) {}
 
 	double lat;
 	double lon;
